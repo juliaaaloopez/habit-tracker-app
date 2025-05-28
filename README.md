@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+# habit-tracker-app
+=======
 # habit-tracker-app 
 
 

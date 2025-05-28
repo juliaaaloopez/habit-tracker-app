@@ -6,6 +6,14 @@ import Snackbar from './components/Snackbar.js';
 import { loadHabits, saveHabits } from './utils/localStorage.js';
 import UndoManager from './utils/undoManager.js';
 
+function getCurrentWeek() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const firstDayOfYear = new Date(year, 0, 1);
+    const pastDaysOfYear = (today - firstDayOfYear) / 86400000;
+    return year + '-W' + String(Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)).padStart(2, '0');
+}
+
 class HabitTrackerApp {
     constructor() {
         this.habits = loadHabits();
@@ -54,30 +62,41 @@ class HabitTrackerApp {
         document.querySelectorAll('.complete-checkbox').forEach(checkbox => {
             checkbox.onchange = (e) => {
                 const habitId = checkbox.dataset.habitId;
+                const frequency = checkbox.dataset.frequency;
                 if (checkbox.checked) {
-                    this.markHabitAsCompleted(habitId);
+                    this.markHabitAsCompleted(habitId, frequency);
                 } else {
-                    this.unmarkHabitAsCompleted(habitId);
+                    this.unmarkHabitAsCompleted(habitId, frequency);
                 }
             };
         });
     }
 
-    markHabitAsCompleted(habitId) {
+    markHabitAsCompleted(habitId, frequency) {
         const today = new Date().toISOString().split('T')[0];
+        const currentWeek = getCurrentWeek();
         const habit = this.habits.find(h => h.id === habitId);
-        if (habit && !habit.completed.includes(today)) {
-            // Save previous state for undo
+        if (!habit) return;
+
+        let key, alreadyCompleted;
+        if (frequency === 'daily') {
+            key = today;
+            alreadyCompleted = habit.completed.includes(today);
+        } else if (frequency === 'weekly') {
+            key = currentWeek;
+            alreadyCompleted = habit.completed.includes(currentWeek);
+        }
+        if (!alreadyCompleted) {
             this.lastCalendarUpdate = {
                 habitId,
-                date: today,
+                key,
                 prevCompleted: [...habit.completed]
             };
-            habit.completed.push(today);
+            habit.completed.push(key);
             this.saveHabits();
             this.render();
             this.showToast('Habit marked as completed!');
-            this.snackbar.show('Completion saved! Undo?', () => this.undoCalendarUpdate());
+            this.snackbar.show('Completion saved! Undo?', () => this.undoCalendarUpdate(frequency));
             clearTimeout(this.undoTimeout);
             this.undoTimeout = setTimeout(() => {
                 this.lastCalendarUpdate = null;
@@ -85,20 +104,29 @@ class HabitTrackerApp {
         }
     }
 
-    unmarkHabitAsCompleted(habitId) {
+    unmarkHabitAsCompleted(habitId, frequency) {
         const today = new Date().toISOString().split('T')[0];
+        const currentWeek = getCurrentWeek();
         const habit = this.habits.find(h => h.id === habitId);
-        if (habit && habit.completed.includes(today)) {
+        if (!habit) return;
+
+        let key;
+        if (frequency === 'daily') {
+            key = today;
+        } else if (frequency === 'weekly') {
+            key = currentWeek;
+        }
+        if (habit.completed.includes(key)) {
             this.lastCalendarUpdate = {
                 habitId,
-                date: today,
+                key,
                 prevCompleted: [...habit.completed]
             };
-            habit.completed = habit.completed.filter(date => date !== today);
+            habit.completed = habit.completed.filter(date => date !== key);
             this.saveHabits();
             this.render();
             this.showToast('Completion undone.');
-            this.snackbar.show('Completion undone! Undo?', () => this.undoCalendarUpdate());
+            this.snackbar.show('Completion undone! Undo?', () => this.undoCalendarUpdate(frequency));
             clearTimeout(this.undoTimeout);
             this.undoTimeout = setTimeout(() => {
                 this.lastCalendarUpdate = null;
@@ -106,7 +134,7 @@ class HabitTrackerApp {
         }
     }
 
-    undoCalendarUpdate() {
+    undoCalendarUpdate(frequency) {
         if (this.lastCalendarUpdate) {
             const { habitId, prevCompleted } = this.lastCalendarUpdate;
             const habit = this.habits.find(h => h.id === habitId);
