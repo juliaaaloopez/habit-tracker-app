@@ -4,22 +4,115 @@ A modern and interactive Java-based habit tracker that allows users to define, m
 
 ---
 
-## 🧠 Used Prompts
+## 🧠 Prompts Used for the Habit Tracker App
 
-The development of this app was driven by detailed Copilot prompts:
+This section documents all the prompts used to guide the development of the Habit Tracker Java app using Copilot and Firebase Studio’s App Prototyper.
 
-- **Add habits**: Interface to create new habits with input validation, toast confirmations, and undo via snackbar.
-- **Mark habits as completed**: Daily checklist with confirmation, undo support, and persistent status per day.
-- **Compliance calendar**: Monthly progress view with color-coded days, streaks, tooltips, and undoable updates.
-- **Delete habits**: Confirmation modal with toast, undo support, and persistent habit removal.
-- **UI Enhancements**:
-  - Use TailwindCSS for layout, typography, color palette, and responsive design.
-  - Add icons (React Icons), skeleton loaders, smooth transitions (Framer Motion), and motivational banners.
-  - Light/Dark mode toggle with persistence in `localStorage`.
-  - SVG-based progress ring for today's completion.
-  - Emoji-based user feedback (e.g., ✅, 💪, 🗑️).
-  - Confetti celebration on full completion.
-  - Tags and streak badges for each habit.
+### 🎯 Core Functionality
+
+#### ➕ Add New Habits
+- Create a feature in the main interface that allows users to define new personal habits.
+- Include:
+  - Input validation (prevent empty submissions).
+  - Confirmation messages via toast.
+  - Undo support via snackbar (5-second window).
+  - Persistent storage using `localStorage` or backend.
+- Store the `habits` array in `localStorage` and load it on app startup.
+
+#### ✅ Mark Habits as Completed
+- Display today’s habits with checkboxes for completion.
+- On checkbox toggle:
+  - Update habit status in state.
+  - Show confirmation toast.
+  - Allow undo via snackbar (5 seconds).
+- Store daily habit completion status in `localStorage` or backend.
+
+#### 📆 Compliance Calendar
+- Build a `ComplianceCalendar` component that shows:
+  - A month view with color-coded days based on completion.
+  - Green = all done, red = missed.
+- For each habit:
+  - Calculate and visualize completion streaks.
+  - Allow undo of visual updates via snackbar.
+- Persist compliance data in `localStorage`, updating on habit check-ins.
+
+#### 🗑️ Delete Habits
+- Add a delete icon next to each habit.
+- On click:
+  - Show confirmation modal.
+  - If confirmed, delete from state and show toast.
+  - Support undo with snackbar (5 seconds).
+- Persist updated habit list in `localStorage`.
+
+---
+
+### 🎨 UI/UX Design & Visual Enhancements
+
+#### 🌈 Theme and Styling
+- Use TailwindCSS or styled-components.
+- Apply:
+  - Consistent color palette (e.g., teal or indigo).
+  - Soft gray backgrounds.
+  - Rounded corners, soft shadows.
+  - Sans-serif fonts.
+- Make layout responsive for desktop and mobile using Tailwind’s grid/flex utilities.
+
+#### 🧩 Component-Level UI Enhancements
+- Apply TailwindCSS to all components:
+  - `NewHabitForm`
+  - `HabitList`
+  - `ComplianceCalendar`
+- Add icons using `react-icons`:
+  - ➕ Add
+  - 🗑️ Delete
+  - ✅ Mark as done
+- Include:
+  - Hover/focus states with transitions.
+  - Fade/slide animations for modals, toasts, and calendar updates (using Framer Motion or CSS transitions).
+  - Skeleton loaders while data is loading.
+  - Frosted glass-style cards with backdrop blur.
+
+---
+
+### 🌟 Advanced Engagement Features
+
+#### 💡 Motivation & Feedback
+- Add a motivational quote banner at the top of the main interface:
+  - Randomly picked from a curated list.
+  - Entrance animation for smooth reveal.
+- Show emoji-based feedback for actions:
+  - ✅ for done
+  - 💪 for streak
+  - 🗑️ for delete
+- Trigger confetti animation when all habits are completed for the day:
+  - Use `canvas-confetti` or `react-confetti`.
+
+#### 🔁 Progress and Streaks
+- Create a circular progress ring component:
+  - Use SVG and Tailwind transitions.
+  - Show today’s habit completion percentage.
+- Add visual elements to emphasize ongoing streaks:
+  - Badge or 🔥 flame icon (e.g., "🔥 5-day streak").
+  - Use gradient backgrounds and animated count-up effects.
+- Allow users to assign a **color tag** to each habit (e.g., health, study, work).
+  - Display tags as colored labels in the habit list.
+
+---
+
+### 🌘 Theme Control
+
+#### 🌞 Light/Dark Mode
+- Add a toggle in the header to switch between light and dark modes.
+- Use `dark:` classes from TailwindCSS.
+- Persist the theme preference in `localStorage`.
+
+---
+
+### 🧠 Usability Features
+
+- Add friendly **empty state** illustrations/messages when no habits exist.
+- Add **hover tooltips** to calendar days:
+  - Show which habits were completed/missed.
 
 ---
 
