@@ -1,8 +1,15 @@
+function getWeekString(date) {
+    const year = date.getFullYear();
+    const firstDayOfYear = new Date(year, 0, 1);
+    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+    return year + '-W' + String(Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)).padStart(2, '0');
+}
+
 export default class ComplianceCalendar {
     constructor(habits, onUndo) {
         this.habits = habits;
         this.onUndo = onUndo;
-        this.lastUpdate = null; // {date, prevStatus}
+        this.lastUpdate = null;
     }
 
     // Calculate compliance for each day of the current month
@@ -14,13 +21,18 @@ export default class ComplianceCalendar {
         const compliance = {};
 
         for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = new Date(year, month, day).toISOString().split('T')[0];
+            const dateObj = new Date(year, month, day);
+            const dateStr = dateObj.toISOString().split('T')[0];
+            const weekStr = getWeekString(dateObj);
             let completedCount = 0;
             let total = 0;
             this.habits.forEach(habit => {
                 if (habit.frequency === 'daily') {
                     total++;
                     if (habit.completed.includes(dateStr)) completedCount++;
+                } else if (habit.frequency === 'weekly') {
+                    total++;
+                    if (habit.completed.includes(weekStr)) completedCount++;
                 }
             });
             compliance[dateStr] = { completedCount, total };
